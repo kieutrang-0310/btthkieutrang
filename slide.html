@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLIDE BÁO CÁO: MINH AN AI AGENT - HỆ THỐNG TỰ ĐỘNG HÓA B2B</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient-start: #F4EDF5;
+      --bg-gradient-mid: #E8D9EC;
+      --bg-gradient-end: #FBF6FC;
+      --primary-taro: #8E7199;
+      --taro-dark: #745580;
+      --taro-deep: #5A3C66;
+      --taro-light: #F3EBF5;
+      --taro-border: #EADBEE;
+      --accent-sage: #729B79;
+      --accent-coral: #D37B63;
+      --accent-peach: #E39774;
+      --accent-amber: #DCAE7A;
+      --text-main: #2F2936;
+      --text-muted: #64748B;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at 15% 15%, #F4EDF5 0%, #E8D9EC 45%, #DFCEE4 100%);
+      color: var(--text-main);
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Claymorphism Cards */
+    .clay-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--taro-border);
+      border-radius: 24px;
+      box-shadow: 0 12px 36px -8px rgba(142, 113, 153, 0.18),
+                  0 4px 12px rgba(142, 113, 153, 0.08),
+                  inset 0 1px 1px rgba(255, 255, 255, 0.9);
+      transition: all 0.25s ease;
+    }
+
+    .clay-card-taro {
+      background: linear-gradient(135deg, #8E7199 0%, #745580 100%);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 14px 40px -10px rgba(116, 85, 128, 0.45),
+                  inset 0 1px 1px rgba(255, 255, 255, 0.35);
+      color: #FFFFFF;
+    }
+
+    .clay-btn {
+      background: linear-gradient(135deg, #8E7199 0%, #745580 100%);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 4px 14px rgba(116, 85, 128, 0.35);
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .clay-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(116, 85, 128, 0.45);
+    }
+
+    /* Fixed 16:9 Slide Canvas */
+    #slide-viewport {
+      width: 95vw;
+      height: 53.43vw; /* 16:9 ratio */
+      max-width: 1400px;
+      max-height: 788px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      background: #FFFFFF;
+      border-radius: 28px;
+      overflow: hidden;
+      border: 2px solid var(--taro-border);
+      box-shadow: 0 35px 90px -20px rgba(116, 85, 128, 0.35),
+                  0 10px 30px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Slide Panels */
+    .slide-panel {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 52px 30px 52px;
+      background: linear-gradient(180deg, #FFFFFF 0%, #FCF9FD 100%);
+      opacity: 0;
+      transform: scale(0.99);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      overflow: hidden;
+    }
+    .slide-panel.active {
+      display: flex;
+      opacity: 1;
+      transform: scale(1);
+      z-index: 10;
+    }
+
+    /* Badge Tag */
+    .badge-taro {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: var(--taro-light);
+      color: var(--taro-dark);
+      border: 1px solid var(--taro-border);
+    }
+
+    /* Indicator Dots */
+    .slide-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 9999px;
+      background: #E2D5E6;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+    .slide-dot.active {
+      width: 26px;
+      background: var(--primary-taro);
+    }
+
+    /* Fullscreen Mode */
+    body.is-fullscreen #slide-viewport {
+      width: 100vw;
+      height: 100vh;
+      max-width: none;
+      max-height: none;
+      border-radius: 0;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================== -->
+  <!-- 16:9 PRESENTATION CONTAINER -->
+  <!-- ============================================================== -->
+  <main id="slide-viewport">
+
+    <!-- ============================================================== -->
+    <!-- SLIDE 1: COVER / TITLE SLIDE -->
+    <!-- ============================================================== -->
+    <section class="slide-panel active" id="slide-1">
+      <!-- Header Bar -->
+      <div class="flex items-center justify-between pb-3 border-b border-[#EADBEE]">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#8E7199] to-[#745580] flex items-center justify-center text-white shadow-sm font-black text-lg">
+            MA
+          </div>
+          <div>
+            <div class="text-xs font-extrabold text-[#745580] uppercase tracking-wider">CÔNG TY CỔ PHẦN CÔNG NGHỆ CÔ NÀNG TINH NGHỊCH</div>
+            <div class="text-[10px] text-slate-400">Small Progress, Big Results ♥ &bull; AI AGENT B2B AUTOMATION</div>
+          </div>
+        </div>
+        <span class="badge-taro">
+          <i class="fa-solid fa-sparkles text-[#8E7199]"></i>
+          <span>BÁO CÁO GIẢI PHÁP 2026</span>
+        </span>
+      </div>
+
+      <!-- Main Body -->
+      <div class="my-auto grid grid-cols-12 gap-8 items-center py-4">
+        <div class="col-span-7 space-y-5">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-50 border border-purple-200 text-xs font-bold text-[#745580]">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Hệ Thống Trợ Lý AI Chuyên Sâu Bán Hàng B2B</span>
+          </div>
+
+          <h1 class="text-3xl lg:text-4xl font-extrabold text-[#2F2936] leading-tight tracking-tight">
+            TỰ ĐỘNG HÓA QUY TRÌNH <br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#8E7199] via-[#745580] to-[#D37B63]">
+              BÁO GIÁ & PHÂN TÍCH ĐA CHIỀU
+            </span>
+          </h1>
+
+          <p class="text-sm text-slate-600 leading-relaxed max-w-xl">
+            Giải pháp AI Agent cục bộ (Local Agent) tiếp nhận yêu cầu từ File Excel, Google Sheet và Email, tự động làm sạch, thẩm định tồn kho ATP, tính toán chiết khấu thông minh và trực quan hóa Dashboard giám sát theo thời gian thực.
+          </p>
+
+          <div class="grid grid-cols-3 gap-3 pt-2">
+            <div class="p-3 rounded-2xl bg-white border border-[#EADBEE] shadow-3xs">
+              <div class="text-xs font-bold text-slate-400 uppercase">Tốc Độ Xử Lý</div>
+              <div class="text-xl font-extrabold text-[#745580] font-mono mt-0.5">&lt; 3 Giây</div>
+              <div class="text-[10px] text-emerald-600 font-semibold mt-0.5"><i class="fa-solid fa-bolt mr-1"></i>Nhanh hơn 95%</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-white border border-[#EADBEE] shadow-3xs">
+              <div class="text-xs font-bold text-slate-400 uppercase">Độ Chuẩn Dữ Liệu</div>
+              <div class="text-xl font-extrabold text-[#729B79] font-mono mt-0.5">99.5%</div>
+              <div class="text-[10px] text-slate-500 font-semibold mt-0.5"><i class="fa-solid fa-shield-halved mr-1"></i>Chuẩn ISO/IEC</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-white border border-[#EADBEE] shadow-3xs">
+              <div class="text-xs font-bold text-slate-400 uppercase">Kiến Trúc Triển Khai</div>
+              <div class="text-xl font-extrabold text-[#D37B63] font-mono mt-0.5">100% Cục Bộ</div>
+              <div class="text-[10px] text-purple-700 font-semibold mt-0.5"><i class="fa-solid fa-lock mr-1"></i>Bảo mật dữ liệu</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-span-5">
+          <div class="clay-card p-6 space-y-4 relative overflow-hidden">
+            <div class="absolute -right-12 -top-12 w-40 h-40 bg-purple-100/50 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-8 h-8 rounded-xl bg-[#8E7199] text-white flex items-center justify-center text-xs font-bold">
+                  <i class="fa-solid fa-robot"></i>
+                </span>
+                <span class="font-bold text-sm text-[#2F2936]">Minh An AI Engine</span>
+              </div>
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[10px] border border-emerald-200">
+                Online &bull; Localhost:8000
+              </span>
+            </div>
+
+            <div class="space-y-2.5 text-xs text-slate-600">
+              <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-file-excel text-emerald-600"></i> Đọc Excel/Google Sheet</span>
+                <span class="font-mono font-bold text-[#745580]">Tự động 100%</span>
+              </div>
+              <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-calculator text-blue-600"></i> Chiết khấu & Biên Lợi Nhuận</span>
+                <span class="font-mono font-bold text-[#745580]">Tự Động Tính</span>
+              </div>
+              <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-chart-pie text-amber-600"></i> Phân Tích 4 Chiều (Kênh/SP/Khách/NVKD)</span>
+                <span class="font-mono font-bold text-[#745580]">Theo Thực Tế File</span>
+              </div>
+              <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-file-word text-purple-600"></i> Xuất Báo Cáo Word & Excel</span>
+                <span class="font-mono font-bold text-[#745580]">Đạt Chuẩn B2B</span>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+              <span>Đơn vị phát triển: Google DeepMind Platform</span>
+              <span class="font-mono">v3.8 Stable</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Bar -->
+      <div class="pt-3 border-t border-[#EADBEE] flex items-center justify-between text-xs text-slate-400 font-medium">
+        <span>Slide 1 / 10 &bull; Tổng Quan Dự Án</span>
+        <span>Phím &rarr; hoặc Phím Space để chuyển trang</span>
+      </div>
+    </section>
+
+
+    <!-- ============================================================== -->
+    <!-- SLIDE 2: BÀI TOÁN THỰC TIỄN & NỖI ĐAU DOANH NGHIỆP -->
+    <!-- ============================================================== -->
+    <section class="slide-panel" id="slide-2">
+      <div class="flex items-center justify-between pb-3 border-b border-[#EADBEE]">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-[#8E7199] text-white flex items-center justify-center font-bold text-xs">02</span>
+          <div>
+            <h2 class="text-base font-extrabold text-[#2F2936]">BỐI CẢNH THỰC TIỄN & NỖI ĐAU CỦA DOANH NGHIỆP B2B</h2>
+            <p class="text-[10px] text-slate-400">Những nút thắt lớn nhất khiến doanh nghiệp đánh mất 30-40% cơ hội bán hàng</p>
+          </div>
+        </div>
+        <span class="badge-taro">THÁCH THỨC VẬN HÀNH</span>
+      </div>
+
+      <div class="my-auto grid grid-cols-3 gap-5 py-4">
+        <!-- Nỗi đau 1 -->
+        <div class="clay-card p-5 space-y-3 border-t-4 border-t-[#D37B63]">
+          <div class="w-10 h-10 rounded-2xl bg-rose-50 text-[#D37B63] flex items-center justify-center text-lg">
+            <i class="fa-solid fa-hourglass-half"></i>
+          </div>
+          <h3 class="font-bold text-sm text-[#2F2936]">Xử Lý Thủ Công & Chậm Trễ</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Nhân viên kinh doanh mất trung bình <strong>45-90 phút</strong> để mở từng email, tải file đính kèm, sao chép sang Excel và dò tìm bảng giá. Khách hàng chờ quá 2 tiếng thường chuyển sang đối thủ cạnh tranh.
+          </p>
+          <div class="p-2.5 rounded-xl bg-rose-50/60 text-[11px] text-[#D37B63] font-semibold">
+            <i class="fa-solid fa-circle-exclamation mr-1"></i> Mất 35% cơ hội vì phản hồi trễ SLA
+          </div>
+        </div>
+
+        <!-- Nỗi đau 2 -->
+        <div class="clay-card p-5 space-y-3 border-t-4 border-t-[#E09F3E]">
+          <div class="w-10 h-10 rounded-2xl bg-amber-50 text-[#E09F3E] flex items-center justify-center text-lg">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <h3 class="font-bold text-sm text-[#2F2936]">Sai Sót Giá & Bội Chi Chiết Khấu</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Không có công cụ tự động đối soát khiến NVKD ước tính chiết khấu theo cảm tính. Mức giảm giá vượt thẩm quyền làm tổn hại biên lợi nhuận gộp, hoặc báo giá sai thông số kỹ thuật và tình trạng tồn kho.
+          </p>
+          <div class="p-2.5 rounded-xl bg-amber-50/60 text-[11px] text-[#E09F3E] font-semibold">
+            <i class="fa-solid fa-percent mr-1"></i> Rò rỉ 4-7% biên lợi nhuận do tính sai
+          </div>
+        </div>
+
+        <!-- Nỗi đau 3 -->
+        <div class="clay-card p-5 space-y-3 border-t-4 border-t-[#8E7199]">
+          <div class="w-10 h-10 rounded-2xl bg-purple-50 text-[#8E7199] flex items-center justify-center text-lg">
+            <i class="fa-solid fa-chart-line-down"></i>
+          </div>
+          <h3 class="font-bold text-sm text-[#2F2936]">Thiếu Báo Cáo Đa Chiều</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Ban giám đốc không nắm được cơ cấu doanh thu theo từng Kênh bán (Affiliate, Meta, Google Search, Email), theo Mặt hàng chủ lực, theo Khách hàng và hiệu suất từng NVKD nếu không tổng hợp bảng biểu phức tạp.
+          </p>
+          <div class="p-2.5 rounded-xl bg-purple-50/60 text-[11px] text-[#8E7199] font-semibold">
+            <i class="fa-solid fa-eye-slash mr-1"></i> Thiếu số liệu để ra quyết định chiến lược
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-[#EADBEE] flex items-center justify-between text-xs text-slate-400 font-medium">
+        <span>Slide 2 / 10 &bull; Bài Toán Doanh Nghiệp</span>
+        <span class="text-[#745580] font-bold">Giải pháp: Tự động hóa khép kín bằng Minh An AI Agent</span>
+      </div>
+    </section>
+
+
+    <!-- ============================================================== -->
+    <!-- SLIDE 3: KIẾN TRÚC HỆ THỐNG 4 TẦNG -->
+    <!-- ============================================================== -->
+    <section class="slide-panel" id="slide-3">
+      <div class="flex items-center justify-between pb-3 border-b border-[#EADBEE]">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-[#8E7199] text-white flex items-center justify-center font-bold text-xs">03</span>
+          <div>
+            <h2 class="text-base font-extrabold text-[#2F2936]">KIẾN TRÚC KỸ THUẬT 4 TẦNG CỦA MINH AN AI AGENT</h2>
+            <p class="text-[10px] text-slate-400">Thiết kế module hóa khép kín, hoạt động độc lập không phụ thuộc vào internet</p>
+          </div>
+        </div>
+        <span class="badge-taro">HỆ THỐNG MODULE</span>
+      </div>
+
+      <div class="my-auto grid grid-cols-4 gap-4 py-4">
+        <!-- Tầng 1 -->
+        <div class="clay-card p-4 space-y-3 flex flex-col justify-between">
+          <div class="space-y-2">
+            <span class="px-2 py-0.5 rounded-md bg-purple-100 text-[#745580] font-bold text-[10px] font-mono">TẦNG 1</span>
+            <h4 class="font-bold text-xs text-[#2F2936] flex items-center gap-1.5">
+              <i class="fa-solid fa-inbox text-[#8E7199]"></i> Tiếp Nhận Đa Kênh
+            </h4>
+            <p class="text-[11px] text-slate-500 leading-relaxed">
+              Nhận file Excel (.xlsx), Google Sheet trực tuyến hoặc văn bản Email thô không gò bó cấu trúc.
+            </p>
+          </div>
+          <div class="space-y-1.5 pt-2 border-t border-slate-100 text-[10px] text-slate-600 font-mono">
+            <div>&bull; SheetJS Parser</div>
+            <div>&bull; Regex Boundary Filter</div>
+            <div>&bull; Auto Column Detection</div>
+          </div>
+        </div>
+
+        <!-- Tầng 2 -->
+        <div class="clay-card p-4 space-y-3 flex flex-col justify-between">
+          <div class="space-y-2">
+            <span class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold text-[10px] font-mono">TẦNG 2</span>
+            <h4 class="font-bold text-xs text-[#2F2936] flex items-center gap-1.5">
+              <i class="fa-solid fa-broom text-[#729B79]"></i> Làm Sạch & Chuẩn Hóa
+            </h4>
+            <p class="text-[11px] text-slate-500 leading-relaxed">
+              Khử nhiễu văn bản, chuẩn hóa SĐT (+84 &rarr; 0), bóc tách Tên, Công ty, Chiết khấu và từng dòng sản phẩm.
+            </p>
+          </div>
+          <div class="space-y-1.5 pt-2 border-t border-slate-100 text-[10px] text-slate-600 font-mono">
+            <div>&bull; Exact & Substring Match</div>
+            <div>&bull; Phone/Email Sanitizer</div>
+            <div>&bull; 0% Bịa Dữ Liệu Khi Rỗng</div>
+          </div>
+        </div>
+
+        <!-- Tầng 3 -->
+        <div class="clay-card p-4 space-y-3 flex flex-col justify-between">
+          <div class="space-y-2">
+            <span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 font-bold text-[10px] font-mono">TẦNG 3</span>
+            <h4 class="font-bold text-xs text-[#2F2936] flex items-center gap-1.5">
+              <i class="fa-solid fa-brain text-blue-600"></i> Engine Thẩm Định AI
+            </h4>
+            <p class="text-[11px] text-slate-500 leading-relaxed">
+              Tra cứu tồn kho ATP, đối soát bảng giá niêm yết, tự động tính tỷ lệ chiết khấu tối ưu và phân bổ NVKD (PIC).
+            </p>
+          </div>
+          <div class="space-y-1.5 pt-2 border-t border-slate-100 text-[10px] text-slate-600 font-mono">
+            <div>&bull; ATP Inventory Verifier</div>
+            <div>&bull; Dynamic Discount Algo</div>
+            <div>&bull; SLA Lead-time Guard</div>
+          </div>
+        </div>
+
+        <!-- Tầng 4 -->
+        <div class="clay-card p-4 space-y-3 flex flex-col justify-between">
+          <div class="space-y-2">
+            <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 font-bold text-[10px] font-mono">TẦNG 4</span>
+            <h4 class="font-bold text-xs text-[#2F2936] flex items-center gap-1.5">
+              <i class="fa-solid fa-chart-pie text-[#D37B63]"></i> Xuất Kết Quả & Dashboard
+            </h4>
+            <p class="text-[11px] text-slate-500 leading-relaxed">
+              Trực quan hóa biểu đồ 4 chiều (Kênh/SP/Khách/PIC), xuất file Excel đa sheet và bản báo cáo Word chuẩn B2B.
+            </p>
+          </div>
+          <div class="space-y-1.5 pt-2 border-t border-slate-100 text-[10px] text-slate-600 font-mono">
+            <div>&bull; Chart.js Responsive Area</div>
+            <div>&bull; Donut Structure Breakdown</div>
+            <div>&bull; Auto Excel & Word Exporter</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-[#EADBEE] flex items-center justify-between text-xs text-slate-400 font-medium">
+        <span>Slide 3 / 10 &bull; Kiến Trúc Kỹ Thuật</span>
+        <span class="text-slate-600 font-semibold">Triển khai trên Python 3.12 HTTP Server + Pure Modern JavaScript</span>
+      </div>
+    </section>
+
+
+    <!-- ============================================================== -->
+    <!-- SLIDE 4: QUY TRÌNH VẬN HÀNH 5 BƯỚC THỰC TẾ -->
+    <!-- ============================================================== -->
+    <section class="slide-panel" id="slide-4">
+      <div class="flex items-center justify-between pb-3 border-b border-[#EADBEE]">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-[#8E7199] text-white flex items-center justify-center font-bold text-xs">04</span>
+          <div>
+            <h2 class="text-base font-extrabold text-[#2F2936]">QUY TRÌNH 5 BƯỚC KHÉP KÍN TRÊN LOCALHOST</h2>
+            <p class="text-[10px] text-slate-400">Trải nghiệm liền mạch, trực quan cho người dùng từ lúc tải file đến khi xuất báo cáo</p>
+          </div>
+        </div>
+        <span class="badge-taro">WORKFLOW 5 BƯỚC</span>
+      </div>
+
+      <div class="my-auto grid grid-cols-5 gap-3 py-4">
+        <!-- Bước 1 -->
+        <div class="clay-card p-4 text-center space-y-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-purple-100 text-[#745580] flex items-center justify-center font-black mx-auto">1</div>
+          <h4 class="font-bold text-xs text-[#2F2936]">Khám Phá & Đăng Nhập</h4>
+          <p class="text-[11px] text-slate-500 leading-relaxed">
+            Người dùng đăng nhập hồ sơ doanh nghiệp. Giới thiệu tổng quan và hướng dẫn định dạng file.
+          </p>
+          <span class="inline-block text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-mono">Bảo mật DN</span>
+        </div>
+
+        <!-- Bước 2 -->
+        <div class="clay-card p-4 text-center space-y-2.5 border-2 border-purple-200">
+          <div class="w-10 h-10 rounded-2xl bg-[#8E7199] text-white flex items-center justify-center font-black mx-auto">2</div>
+          <h4 class="font-bold text-xs text-[#2F2936]">Nạp File / Nhập Yêu Cầu</h4>
+          <p class="text-[11px] text-slate-500 leading-relaxed">
+            Kéo thả file Excel, dán Google Sheet hoặc nhập văn bản. Nhập chỉ đạo mục tiêu riêng cho Agent.
+          </p>
+          <span class="inline-block text-[10px] px-2 py-0.5 rounded-full bg-purple-100 text-[#745580] font-mono">Đa định dạng</span>
+        </div>
+
+        <!-- Bước 3 -->
+        <div class="clay-card p-4 text-center space-y-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-purple-100 text-[#745580] flex items-center justify-center font-black mx-auto">3</div>
+          <h4 class="font-bold text-xs text-[#2F2936]">Làm Sạch & Xử Lý</h4>
+          <p class="text-[11px] text-slate-500 leading-relaxed">
+            Hệ thống tự động chạy 4 bước kiểm định: Chuẩn hóa, Khớp bảng giá, Thẩm định tồn kho ATP, Phân bổ PIC.
+          </p>
+          <span class="inline-block text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-mono">&lt; 2 Giây</span>
+        </div>
+
+        <!-- Bước 4 -->
+        <div class="clay-card p-4 text-center space-y-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-purple-100 text-[#745580] flex items-center justify-center font-black mx-auto">4</div>
+          <h4 class="font-bold text-xs text-[#2F2936]">Xem Trước & Duyệt</h4>
+          <p class="text-[11px] text-slate-500 leading-relaxed">
+            Xem toàn bộ bảng báo giá chi tiết, thư báo giá và các điều khoản. Chọn Đồng Ý hoặc Yêu Cầu Xử Lý Lại.
+          </p>
+          <span class="inline-block text-[10px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-mono">Human-in-loop</span>
+        </div>
+
+        <!-- Bước 5 -->
+        <div class="clay-card p-4 text-center space-y-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-[#729B79] text-white flex items-center justify-center font-black mx-auto">5</div>
+          <h4 class="font-bold text-xs text-[#2F2936]">Kết Quả & Dashboard</h4>
+          <p class="text-[11px] text-slate-500 leading-relaxed">
+            Bảng điều khiển đa chiều thời gian thực, tải tệp Excel phân tích đa sheet và báo cáo Word hoàn chỉnh.
+          </p>
+          <span class="inline-block text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-mono">Full Analytics</span>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-[#EADBEE] flex items-center justify-between text-xs text-slate-400 font-medium">
+        <span>Slide 4 / 10 &bull; Trải Nghiệm Người Dùng</span>
+        <span class="text-emerald-700 font-semibold"><i class="fa-solid fa-check-circle mr-1"></i>Hỗ trợ cả chế độ Online lẫn Fallback 100% Offline Client-Side</span>
+      </div>
+    </section>
+
+
+    <!-- ============================================================== -->
+    <!-- SLIDE 5: THẨM ĐỊNH KINH DOANH THÔNG MINH (ATP & CHIẾT KHẤU) -->
+    <!-- ============================================================== -->
+    <section class="slide-panel" id="slide-5">
+      <div class="flex items-center justify-between pb-3 border-b border-[#EADBEE]">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-[#8E7199] text-white flex items-center justify-center font-bold text-xs">05</span>
+          <div>
+            <h2 class="text-base font-extrabold text-[#2F2936]">THẨM ĐỊNH TỒN KHO ATP & CƠ CHẾ CHIẾT KHẤU TỰ ĐỘNG</h2>
+            <p class="text-[10px] text-slate-400">Loại bỏ hoàn toàn rủi ro bán vượt tồn kho hoặc chiết khấu thủ công theo cảm tính</p>
+          </div>
+        </div>
+        <span class="badge-taro">THẨM ĐỊNH TỰ ĐỘNG</span>
+      </div>
+
+      <div class="my-auto grid grid-cols-2 gap-6 py-4">
+        <!-- Panel Trái: ATP Tồn kho -->
+        <div class="clay-card p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-sm text-[#2F2936] flex items-center gap-2">
+              <span class="w-7 h-7 rounded-lg bg-emerald-100 text-[#729B79] flex items-center justify-center text-xs font-bold">
+                <i class="fa-solid fa-boxes-stacked"></i>
+              </span>
+              <span>Thẩm Định Tồn Kho Thực Tế (ATP - Available to Promise)</span>
+            </h3>
+            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">Cam kết SLA</span>
+          </div>
+
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Hệ thống tự động đối chiếu số lượng cần mua trong từng dòng của khách hàng với lượng hàng tồn kho khả dụng thời gian thực.
+          </p>
+
+          <div class="space-y-2 text-xs">
+            <div class="p-3 rounded-xl bg-emerald-50/70 border border-emerald-200/80 flex items-center justify-between">
+              <div>
+                <strong class="text-emerald-900 block font-semibold">Tồn kho đủ (Stock &ge; Qty)</strong>
+                <span class="text-[11px] text-emerald-700">Giao hàng ngay trong 24 giờ làm việc</span>
+              </div>
+              <span class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-bold text-xs">Sẵn sàng giao</span>
+            </div>
+
+            <div class="p-3 rounded-xl bg-amber-50/70 border border-amber-200/80 flex items-center justify-between">
+              <div>
+                <strong class="text-amber-900 block font-semibold">Thiếu hàng / Cần đặt thêm (Stock &lt; Qty)</strong>
+                <span class="text-[11px] text-amber-700">Tự động cộng thời gian Lead-time nhập khẩu (+3 đến 14 ngày)</span>
+              </div>
+              <span class="px-2.5 py-1 rounded-lg bg-amber-600 text-white font-bold text-xs">Cảnh báo hạn giao</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel Phải: Chiết khấu tự động -->
+        <div class="clay-card p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-sm text-[#2F2936] flex items-center gap-2">
+              <span class="w-7 h-7 rounded-lg bg-purple-100 text-[#745580] flex items-center justify-center text-xs font-bold">
+                <i class="fa-solid fa-calculator"></i>
+              </span>
+              <span>Công Thức Tính Chiết Khấu Tự Động (Auto Discount)</span>
+            </h3>
+            <span class="text-[10px] font-bold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200">Không bịa số</span>
+          </div>
+
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Agent tự động xác định mức chiết khấu an toàn dựa trên Tổng giá trị đơn hàng thực tế của khách, giữ vững biên lợi nhuận:
+          </p>
+
+          <div class="space-y-2 text-xs">
+            <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex justify-between items-center">
+              <span>Đơn hàng &lt; 20 triệu VNĐ</span>
+              <span class="font-mono font-bold text-slate-700">Chiết khấu: <strong>0%</strong> (Giá niêm yết)</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-purple-50/70 border border-purple-200 flex justify-between items-center">
+              <span>Đơn hàng từ 20 Tr - 50 Tr VNĐ</span>
+              <span class="font-mono font-bold text-[#745580]">Chiết khấu: <strong>3.0%</strong> (NVKD tự quyết)</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-purple-50/70 border border-purple-200 flex justify-between items-center">
+              <span>Đơn hàng từ 50 Tr - 150 Tr VNĐ</span>
+              <span class="font-mono font-bold text-[#745580]">Chiết khấu: <strong>5.0%</strong> (Trần thẩm quyền NVKD)</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 flex justify-between items-center">
+              <span>Đơn hàng &gt; 150 Tr VNĐ (&gt; 5%)</span>
+              <span class="font-mono font-bold text-rose-700">Chiết khấu: <strong>6.5% - 10%</strong> (Cần TPKD duyệt)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-[#EADBEE] flex items-center justify-between text-xs text-slate-400 font-medium">
+        <span>Slide 5 / 10 &bull; Thẩm Định & Thuật Toán</span>
+        <span class="text-[#745580] font-bold">Hệ thống bảo vệ biên lợi nhuận doanh nghiệp luôn trên 20%</span>
+      </div>
+    </section>
+
+
+    <!-- ============================================================== -->
+    <!-- SLIDE 6: DASHBOARD EXECUTIVE ANALYTICS ĐA CHIỀU -->
+    <!-- ============================================================== -->
+    <section class="slide-panel" id="slide-6">
+      <div class="flex items-center justify-between pb-3 border-b border-[#EADBEE]">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-[#8E7199] text-white flex items-center justify-center font-bold text-xs">06</span>
+          <div>
+            <h2 class="text-base font-extrabold text-[#2F2936]">BẢNG ĐIỀU KHIỂN PHÂN TÍCH ĐA CHIỀU (EXECUTIVE DASHBOARD)</h2>
+            <p class="text-[10px] text-slate-400">Tự do chuyển đổi trực tiếp giữa 4 chiều phân tích: Kênh bán, Sản phẩm, Khách hàng, NVKD</p>
+          </div>
+        </div>
+        <span class="badge-taro">TRỰC QUAN HÓA THỜI GIAN THỰC</span>
+      </div>
+
+      <div class="my-auto space-y-4 py-2">
+        <!-- 4 Dimension Selector Badges -->
+        <div class="flex items-center justify-between p-2.5 rounded-2xl bg-white border border-[#EADBEE] shadow-3xs">
+          <span class="text-xs font-bold text-slate-700 flex items-center gap-2">
+            <i class="fa-solid fa-arrows-split-up-and-left text-[#8E7199]"></i>
+            <span>4 Chiều Phân Tích Linh Hoạt (Bấm để xem thay đổi tức thì):</span>
+          </span>
+          <div class="flex items-center gap-2 text-xs font-bold">
+            <span class="px-3 py-1 rounded-xl bg-[#8E7199] text-white shadow-xs">1. Kênh Bán (Affiliate, Meta, Email, Google)</span>
+            <span class="px-3 py-1 rounded-xl bg-slate-100 text-slate-600">2. Sản Phẩm (Từng mã SKU)</span>
+            <span class="px-3 py-1 rounded-xl bg-slate-100 text-slate-600">3. Khách Hàng (Từng doanh nghiệp)</span>
+            <span class="px-3 py-1 rounded-xl bg-slate-100 text-slate-600">4. NVKD (Phòng ban & PIC)</span>
+          </div>
+        </div>
+
+        <!-- 3 Panel Layout matching Localhost photo -->
+        <div class="grid grid-cols-12 gap-4">
+          <!-- Area/Line Chart -->
+          <div class="col-span-5 clay-card p-4 space-y-2">
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold text-xs text-slate-800">Phân Bổ & Xu Hướng (Area Chart)</h4>
+              <div class="flex items-center gap-2 text-[9px] font-semibold">
+                <span class="flex items-center gap-1 text-[#D37B63]"><span class="w-2 h-2 rounded-full bg-[#D37B63]"></span> Số đơn</span>
+                <span class="flex items-center gap-1 text-[#E39774]"><span class="w-2 h-2 rounded-full bg-[#E39774]"></span> Sản lượng</span>
+                <span class="flex items-center gap-1 text-[#729B79]"><span class="w-2 h-2 rounded-full bg-[#729B79]"></span> Doanh số</span>
+              </div>
+            </div>
+            <div class="h-40 rounded-xl bg-gradient-to-b from-purple-50/40 to-white border border-purple-100 flex items-center justify-center p-3">
+              <!-- SVG Mini Mock Chart -->
+              <svg viewBox="0 0 300 120" class="w-full h-full">
+                <path d="M 10,80 Q 80,20 150,55 T 290,40 L 290,120 L 10,120 Z" fill="rgba(114, 155, 121, 0.25)"></path>
+                <path d="M 10,80 Q 80,20 150,55 T 290,40" fill="none" stroke="#729B79" stroke-width="2.5"></path>
+                <path d="M 10,95 Q 80,60 150,75 T 290,70" fill="none" stroke="#E39774" stroke-width="2"></path>
+                <path d="M 10,105 Q 80,85 150,90 T 290,88" fill="none" stroke="#D37B63" stroke-width="1.8" stroke-dasharray="3,3"></path>
+                <circle cx="150" cy="55" r="4" fill="#729B79"></circle>
+                <circle cx="290" cy="40" r="4" fill="#729B79"></circle>
+              </svg>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-400 font-mono px-2">
+              <span>Affiliate</span><span>Email</span><span>Meta</span><span>Google Search</span>
+            </div>
+          </div>
+
+          <!-- Donut Chart -->
+          <div class="col-span-4 clay-card p-4 space-y-2">
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold text-xs text-slate-800">Cơ Cấu Tỷ Trọng (Donut)</h4>
+              <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">4 nhóm</span>
+            </div>
+            <div class="h-40 flex items-center justify-between gap-2">
+              <!-- SVG Donut -->
+              <div class="relative w-28 h-28 shrink-0">
+                <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#729B79" stroke-width="5" stroke-dasharray="40 60"></circle>
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#D37B63" stroke-width="5" stroke-dasharray="29 71" stroke-dashoffset="-40"></circle>
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#DCAE7A" stroke-width="5" stroke-dasharray="19 81" stroke-dashoffset="-69"></circle>
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#B38271" stroke-width="5" stroke-dasharray="12 88" stroke-dashoffset="-88"></circle>
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                  <span class="text-sm font-black text-slate-800">4</span>
+                  <span class="text-[8px] text-slate-400 uppercase font-bold">Kênh bán</span>
+                </div>
+              </div>
+              <div class="flex-1 space-y-1.5 text-[10px] font-semibold">
+                <div class="flex items-center justify-between"><span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#729B79]"></span>Affiliate</span><span class="text-slate-800 font-bold">40%</span></div>
+                <div class="flex items-center justify-between"><span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#D37B63]"></span>Email</span><span class="text-slate-800 font-bold">29%</span></div>
+                <div class="flex items-center justify-between"><span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#DCAE7A]"></span>Meta</span><span class="text-slate-800 font-bold">19%</span></div>
+                <div class="flex items-center justify-between"><span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#B38271]"></span>Google</span><span class="text-slate-800 font-bold">12%</span></div>
+              </div>
+            </div>
+            <div class="text-[9px] text-center text-slate-400 border-t border-slate-100 pt-1">Tỷ trọng doanh số & giao dịch chuẩn xác</div>
+          </div>
+
+          <!-- Quality Audit -->
+          <div class="col-span-3 clay-card p-4 space-y-2 flex flex-col justify-between">
+            <div>
+              <h4 class="font-bold text-xs text-slate-800">Tiêu Chuẩn Hoàn Tất</h4>
+              <p class="text-[10px] text-slate-400">Kiểm tra chất lượng dữ liệu</p>
+              <div class="space-y-2 mt-3 text-xs">
+                <div class="flex justify-between py-1 border-b border-slate-100">
+                  <span class="text-slate-500">Định dạng chuẩn</span>
+                  <span class="font-bold text-emerald-600">100%</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-100">
+                  <span class="text-slate-500">Đối soát giá</span>
+                  <span class="font-bold text-slate-700">Đã khớp</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-100">
+                  <span class="text-slate-500">Chứng nhận</span>
+                  <span class="font-bold text-[#745580]">Hạng A+</span>
+                </div>
+              </div>
+            </div>
+            <button class="w-full py-2 rounded-xl clay-btn text-white font-bold text-[11px] flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-download text-[10px]"></i> Xuất Báo Cáo Excel
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-[#EADBEE] flex items-center justify-between text-xs text-slate-400 font-medium">
+        <span>Slide 6 / 10 &bull; Trực Quan Hóa Dashboard</span>
+        <span class="text-slate-600 font-semibold">Tự động lấy tên thật từ file của người dùng, không bịa tên giả</span>
+      </div>
+    </section>
+
+
+    <!-- ============================================================== -->
+    <!-- SLIDE 7: BẢN XUẤT ĐẦU RA (EXCEL ĐA SHEET & BÁO CÁO WORD) -->
+    <!-- ============================================================== -->
+    <section class="slide-panel" id="slide-7">
+      <div class="flex items-center justify-between pb-3 border-b border-[#EADBEE]">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-[#8E7199] text-white flex items-center justify-center font-bold text-xs">07</span>
+          <div>
+            <h2 class="text-base font-extrabold text-[#2F2936]">SẢN PHẨM ĐẦU RA HOÀN THIỆN: EXCEL ĐA SHEET & FILE WORD</h2>
+            <p class="text-[10px] text-slate-400">Xuất tài liệu hoàn chỉnh bàn giao ngay cho khách hàng và lưu trữ nội bộ doanh nghiệp</p>
+          </div>
+        </div>
+        <span class="badge-taro">OUTPUT FORMAT</span>
+      </div>
+
+      <div class="my-auto grid grid-cols-2 gap-6 py-4">
+        <!-- Cột 1: File Word -->
+        <div class="clay-card p-5 space-y-3.5">
+          <div class="flex items-center gap-3">
+            <span class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
+              <i class="fa-solid fa-file-word"></i>
+            </span>
+            <div>
+              <h3 class="font-bold text-sm text-[#2F2936]">Bản Báo Cáo File Word Hoàn Thiện (.doc)</h3>
+              <p class="text-[11px] text-slate-400">Định dạng văn bản chuẩn thể thức thương mại B2B</p>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-2">
+            <div class="flex items-center gap-2 font-bold text-[#745580]">
+              <i class="fa-solid fa-check text-emerald-500"></i> Tiêu đề & Thông tin pháp lý công ty
+            </div>
+            <div class="flex items-center gap-2 font-bold text-[#745580]">
+              <i class="fa-solid fa-check text-emerald-500"></i> Bảng báo giá chi tiết từng dòng mặt hàng
+            </div>
+            <div class="flex items-center gap-2 font-bold text-[#745580]">
+              <i class="fa-solid fa-check text-emerald-500"></i> Điều khoản thương mại, SLA giao hàng & phạt chậm trễ
+            </div>
+            <div class="flex items-center gap-2 font-bold text-[#745580]">
+              <i class="fa-solid fa-check text-emerald-500"></i> Khung ký tên & Phê duyệt của Đại diện hai bên
+            </div>
+          </div>
+
+          <p class="text-[11px] text-slate-500">
+            Khách hàng có thể mở trực tiếp bằng Microsoft Word, in ấn hoặc chuyển đổi sang định dạng PDF để ký số điện tử.
+          </p>
+        </div>
+
+        <!-- Cột 2: File Excel đa sheet -->
+        <div class="clay-card p-5 space-y-3.5">
+          <div class="flex items-center gap-3">
+            <span class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+              <i class="fa-solid fa-file-excel"></i>
+            </span>
+            <div>
+              <h3 class="font-bold text-sm text-[#2F2936]">Sổ Cái Phân Tích Excel Đa Sheet (.xlsx)</h3>
+              <p class="text-[11px] text-slate-400">Đầy đủ công thức tính toán và số liệu đa chiều</p>
+            </div>
+          </div>
+
+          <div class="space-y-2 text-xs">
+            <div class="p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-100 flex items-center justify-between">
+              <span class="font-bold text-slate-800">Sheet 1: Tổng Quan & KPI</span>
+              <span class="text-[11px] text-emerald-700 font-mono">Doanh thu, Tỷ lệ sạch, Chuẩn ISO</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-purple-50/60 border border-purple-100 flex items-center justify-between">
+              <span class="font-bold text-slate-800">Sheet 2: Phân Bổ Mặt Hàng (SKU)</span>
+              <span class="text-[11px] text-[#745580] font-mono">Tên SP, Đơn giá, Nhu cầu, Tồn kho</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-blue-50/60 border border-blue-100 flex items-center justify-between">
+              <span class="font-bold text-slate-800">Sheet 3: Cơ Cấu Kênh Bán</span>
+              <span class="text-[11px] text-blue-700 font-mono">Affiliate, Meta, Email, Google Search</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-amber-50/60 border border-amber-100 flex items-center justify-between">
+              <span class="font-bold text-slate-800">Sheet 4: Báo Cáo Phê Duyệt</span>
+              <span class="text-[11px] text-amber-800 font-mono">Lịch sử duyệt & Phản hồi khách</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-[#EADBEE] flex items-center justify-between text-xs text-slate-400 font-medium">
+        <span>Slide 7 / 10 &bull; Sản Phẩm Bàn Giao</span>
+        <span class="text-[#729B79] font-bold"><i class="fa-solid fa-file-arrow-down mr-1"></i>Tự động đóng gói và tải về chỉ với 1 cú click</span>
+      </div>
+    </section>
+
+
+    <!-- ============================================================== -->
+    <!-- SLIDE 8: CƠ CHẾ PHẢN HỒI & PHÊ DUYỆT (FEEDBACK & DECISIONS) -->
+    <!-- ============================================================== -->
+    <section class="slide-panel" id="slide-8">
+      <div class="flex items-center justify-between pb-3 border-b border-[#EADBEE]">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-[#8E7199] text-white flex items-center justify-center font-bold text-xs">08</span>
+          <div>
+            <h2 class="text-base font-extrabold text-[#2F2936]">CƠ CHẾ PHẢN HỒI (FEEDBACK) & PHÊ DUYỆT CỦA KHÁCH HÀNG</h2>
+            <p class="text-[10px] text-slate-400">Ghi nhận minh bạch lịch sử đồng ý / từ chối và tự động xử lý lại yêu cầu</p>
+          </div>
+        </div>
+        <span class="badge-taro">TƯƠNG TÁC 2 CHIỀU</span>
+      </div>
+
+      <div class="my-auto grid grid-cols-2 gap-6 py-4">
+        <!-- Quy trình Đồng Ý vs Từ Chối -->
+        <div class="clay-card p-5 space-y-4">
+          <h3 class="font-bold text-sm text-[#2F2936] flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-purple-100 text-[#745580] flex items-center justify-center text-xs font-bold">
+              <i class="fa-solid fa-handshake"></i>
+            </span>
+            <span>Quy Trình Phê Duyệt Hai Chiều</span>
+          </h3>
+
+          <div class="space-y-3 text-xs">
+            <!-- Kịch bản 1 -->
+            <div class="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-extrabold text-emerald-800 flex items-center gap-1.5">
+                  <i class="fa-solid fa-circle-check"></i> Khách Hàng Đồng Ý Duyệt
+                </span>
+                <span class="px-2 py-0.5 rounded-md bg-emerald-600 text-white font-mono text-[10px]">SUCCESS</span>
+              </div>
+              <p class="text-[11px] text-emerald-700">
+                Chốt phương án giá &bull; Hệ thống tự động chuyển sang Bước 5 &bull; Cập nhật vào Sổ cái Doanh thu &bull; Sinh hợp đồng thương mại.
+              </p>
+            </div>
+
+            <!-- Kịch bản 2 -->
+            <div class="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-extrabold text-amber-800 flex items-center gap-1.5">
+                  <i class="fa-solid fa-rotate-left"></i> Khách Chưa Duyệt / Yêu Cầu Xử Lý Lại
+                </span>
+                <span class="px-2 py-0.5 rounded-md bg-amber-600 text-white font-mono text-[10px]">REWORK</span>
+              </div>
+              <p class="text-[11px] text-amber-800">
+                Mở form ghi nhận lý do cụ thể (Ví dụ: cần tăng chiết khấu lên 6%, đổi hạn giao gấp) &bull; Agent tự động tính toán lại và đề xuất bản mới.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Khung chat AI Feedback -->
+        <div class="clay-card p-5 space-y-3">
+          <h3 class="font-bold text-sm text-[#2F2936] flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">
+              <i class="fa-solid fa-comments"></i>
+            </span>
+            <span>Trợ Lý AI Tương Tác Trực Tiếp (Live Chatbot)</span>
+          </h3>
+
+          <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
+            <div class="p-2.5 rounded-xl bg-purple-100/60 text-[#5A3C66] text-[11px]">
+              <strong>Khách Hàng:</strong> "Hãy chuyển sang phân tích Kênh Bán và tính giúp tôi mức chiết khấu 7% nhé!"
+            </div>
+            <div class="p-2.5 rounded-xl bg-white border border-purple-100 text-slate-700 text-[11px]">
+              <strong>Minh An AI:</strong> "🤖 Agent đã tiếp nhận! Đã tự động kích hoạt chiều phân tích Kênh Bán và thẩm định mức chiết khấu 7%. Do vượt thẩm quyền 5%, hệ thống đã gửi thông báo đến Trưởng phòng để phê duyệt nhanh."
+            </div>
+          </div>
+
+          <div class="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-100 text-[11px] text-emerald-800 font-semibold flex items-center gap-2">
+            <i class="fa-solid fa-database"></i> Dữ liệu nhận xét được đồng bộ trực tiếp vào cơ sở dữ liệu SQLite
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-[#EADBEE] flex items-center justify-between text-xs text-slate-400 font-medium">
+        <span>Slide 8 / 10 &bull; Quản Trị Phê Duyệt</span>
+        <span class="text-slate-600 font-semibold">Báo cáo số liệu Đồng ý / Chưa đồng ý hiển thị minh bạch tại Bước 5</span>
+      </div>
+    </section>
+
+
+    <!-- ============================================================== -->
+    <!-- SLIDE 9: HIỆU QUẢ KINH DOANH & ĐO LƯỜNG ROI -->
+    <!-- ============================================================== -->
+    <section class="slide-panel" id="slide-9">
+      <div class="flex items-center justify-between pb-3 border-b border-[#EADBEE]">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-[#8E7199] text-white flex items-center justify-center font-bold text-xs">09</span>
+          <div>
+            <h2 class="text-base font-extrabold text-[#2F2936]">HIỆU QUẢ VẬN HÀNH & ĐO LƯỜNG LỢI ÍCH (ROI)</h2>
+            <p class="text-[10px] text-slate-400">Minh chứng thực tế sau khi áp dụng Minh An AI Agent vào doanh nghiệp</p>
+          </div>
+        </div>
+        <span class="badge-taro">HIỆU QUẢ ĐẦU TƯ</span>
+      </div>
+
+      <div class="my-auto grid grid-cols-4 gap-4 py-4">
+        <!-- Chỉ số 1 -->
+        <div class="clay-card p-5 text-center space-y-2">
+          <div class="w-12 h-12 rounded-2xl bg-purple-100 text-[#745580] flex items-center justify-center text-xl mx-auto">
+            <i class="fa-solid fa-clock"></i>
+          </div>
+          <div class="text-2xl font-black text-[#745580] font-mono">95%</div>
+          <h4 class="font-bold text-xs text-[#2F2936]">Tiết Kiệm Thời Gian</h4>
+          <p class="text-[11px] text-slate-500 leading-relaxed">
+            Giảm thời gian xử lý một đơn hàng từ 45 phút xuống dưới 3 giây.
+          </p>
+        </div>
+
+        <!-- Chỉ số 2 -->
+        <div class="clay-card p-5 text-center space-y-2">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl mx-auto">
+            <i class="fa-solid fa-chart-line-up"></i>
+          </div>
+          <div class="text-2xl font-black text-emerald-700 font-mono">+35%</div>
+          <h4 class="font-bold text-xs text-[#2F2936]">Tỷ Lệ Chốt Thành Công</h4>
+          <p class="text-[11px] text-slate-500 leading-relaxed">
+            Phản hồi báo giá tức thì giúp giữ chân khách hàng trước các đối thủ.
+          </p>
+        </div>
+
+        <!-- Chỉ số 3 -->
+        <div class="clay-card p-5 text-center space-y-2">
+          <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl mx-auto">
+            <i class="fa-solid fa-shield-check"></i>
+          </div>
+          <div class="text-2xl font-black text-amber-700 font-mono">100%</div>
+          <h4 class="font-bold text-xs text-[#2F2936]">Chuẩn Xác Bảng Giá</h4>
+          <p class="text-[11px] text-slate-500 leading-relaxed">
+            Loại bỏ triệt để lỗi sai giá, sai thông số hoặc bán hàng thiếu tồn kho.
+          </p>
+        </div>
+
+        <!-- Chỉ số 4 -->
+        <div class="clay-card p-5 text-center space-y-2">
+          <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center text-xl mx-auto">
+            <i class="fa-solid fa-coins"></i>
+          </div>
+          <div class="text-2xl font-black text-blue-700 font-mono">3x</div>
+          <h4 class="font-bold text-xs text-[#2F2936]">Năng Suất Mỗi NVKD</h4>
+          <p class="text-[11px] text-slate-500 leading-relaxed">
+            Một nhân sự xử lý hơn 120 đơn/ngày thay vì tối đa 25 đơn thủ công.
+          </p>
+        </div>
+      </div>
+
+      <div class="p-3.5 rounded-2xl bg-gradient-to-r from-purple-50 via-white to-emerald-50 border border-[#EADBEE] flex items-center justify-between text-xs">
+        <span class="font-bold text-[#745580]">
+          <i class="fa-solid fa-award mr-1 text-amber-500"></i> Thời gian hoàn vốn đầu tư giải pháp (Payback Period): Dưới 45 ngày vận hành
+        </span>
+        <span class="text-slate-500 font-mono">Dựa trên quy mô đội ngũ 5-20 Sales B2B</span>
+      </div>
+
+      <div class="pt-3 border-t border-[#EADBEE] flex items-center justify-between text-xs text-slate-400 font-medium">
+        <span>Slide 9 / 10 &bull; Hiệu Quả Đầu Tư</span>
+        <span class="text-slate-600 font-semibold">Tối ưu chi phí vận hành và tăng trưởng doanh thu bền vững</span>
+      </div>
+    </section>
+
+
+    <!-- ============================================================== -->
+    <!-- SLIDE 10: LỘ TRÌNH PHÁT TRIỂN & KẾT LUẬN -->
+    <!-- ============================================================== -->
+    <section class="slide-panel" id="slide-10">
+      <div class="flex items-center justify-between pb-3 border-b border-[#EADBEE]">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-[#8E7199] text-white flex items-center justify-center font-bold text-xs">10</span>
+          <div>
+            <h2 class="text-base font-extrabold text-[#2F2936]">LỘ TRÌNH PHÁT TRIỂN & CAM KẾT ĐỒNG HÀNH</h2>
+            <p class="text-[10px] text-slate-400">Định hướng nâng cấp AI Agent và thông tin liên hệ phối hợp triển khai</p>
+          </div>
+        </div>
+        <span class="badge-taro">KẾT LUẬN & LIÊN HỆ</span>
+      </div>
+
+      <div class="my-auto grid grid-cols-12 gap-6 py-4">
+        <!-- Lộ trình 3 giai đoạn -->
+        <div class="col-span-7 space-y-3">
+          <h3 class="font-bold text-sm text-[#2F2936] flex items-center gap-2">
+            <i class="fa-solid fa-map-location-dot text-[#8E7199]"></i>
+            <span>Lộ Trình Nâng Cấp Hệ Thống 2026</span>
+          </h3>
+
+          <div class="space-y-2.5 text-xs">
+            <div class="p-3 rounded-2xl bg-purple-50/70 border border-purple-200 flex items-start gap-3">
+              <span class="w-6 h-6 rounded-lg bg-[#8E7199] text-white flex items-center justify-center text-[10px] font-bold shrink-0">Q1</span>
+              <div>
+                <strong class="text-[#2F2936] block font-bold">Hoàn Thiện Local Agent & Báo Cáo Đa Chiều</strong>
+                <p class="text-[11px] text-slate-600">Đã hoàn thành 100%: Xử lý Excel/Sheet, Thẩm định ATP, Xuất Word/Excel, Dashboard thời gian thực.</p>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-white border border-[#EADBEE] flex items-start gap-3 shadow-3xs">
+              <span class="w-6 h-6 rounded-lg bg-[#729B79] text-white flex items-center justify-center text-[10px] font-bold shrink-0">Q2</span>
+              <div>
+                <strong class="text-[#2F2936] block font-bold">Tích Hợp Trực Tiếp ERP & Kế Toán</strong>
+                <p class="text-[11px] text-slate-600">Kết nối hai chiều với phần mềm MISA, SAP, Odoo để tự động xuất hóa đơn điện tử khi khách bấm Đồng ý.</p>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-white border border-[#EADBEE] flex items-start gap-3 shadow-3xs">
+              <span class="w-6 h-6 rounded-lg bg-[#D37B63] text-white flex items-center justify-center text-[10px] font-bold shrink-0">Q3</span>
+              <div>
+                <strong class="text-[#2F2936] block font-bold">Mô Hình AI Dự Báo Nhu Cầu Tồn Kho</strong>
+                <p class="text-[11px] text-slate-600">Dùng Machine Learning dự đoán xu hướng đặt hàng các tháng cao điểm để cảnh báo nhập hàng trước 30 ngày.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Thông tin liên hệ -->
+        <div class="col-span-5">
+          <div class="clay-card-taro p-6 rounded-3xl space-y-4 text-center">
+            <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white text-2xl mx-auto shadow-md">
+              <i class="fa-solid fa-heart"></i>
+            </div>
+
+            <div>
+              <h4 class="font-extrabold text-base text-white">CÔ NÀNG TINH NGHỊCH</h4>
+              <p class="text-xs text-purple-100 mt-0.5">Small Progress, Big Results ♥</p>
+            </div>
+
+            <p class="text-[11px] text-purple-100/90 leading-relaxed px-2">
+              Sẵn sàng đồng hành cùng doanh nghiệp số hóa quy trình kinh doanh, tối ưu hóa năng suất và đột phá doanh số.
+            </p>
+
+            <div class="pt-3 border-t border-white/20 text-xs space-y-2 text-left px-2">
+              <div class="flex items-center gap-2.5">
+                <i class="fa-solid fa-globe text-purple-200 w-4"></i>
+                <span class="font-mono">http://localhost:8000</span>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <i class="fa-solid fa-phone text-purple-200 w-4"></i>
+                <span class="font-mono">0912 345 671</span>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <i class="fa-solid fa-envelope text-purple-200 w-4"></i>
+                <span class="font-mono">kinhdoanh@conangtinhnghich.vn</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-[#EADBEE] flex items-center justify-between text-xs text-slate-400 font-medium">
+        <span>Slide 10 / 10 &bull; Kết Thúc Bài Báo Cáo</span>
+        <span class="text-[#745580] font-bold">Trân trọng cảm ơn Quý Ban Giám Đốc!</span>
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- ============================================================== -->
+  <!-- FLOATING CONTROLLER (BOTTOM TOOLBAR) -->
+  <!-- ============================================================== -->
+  <nav class="fixed bottom-4 z-50 clay-card px-5 py-2.5 flex items-center gap-4 text-xs font-bold text-slate-700 shadow-lg">
+    <!-- Prev Button -->
+    <button onclick="prevSlide()" class="p-2 rounded-xl hover:bg-purple-100 text-[#745580] transition flex items-center gap-1 cursor-pointer">
+      <i class="fa-solid fa-chevron-left text-xs"></i>
+      <span class="hidden sm:inline">Trang Trước</span>
+    </button>
+
+    <!-- Indicators -->
+    <div class="flex items-center gap-1.5" id="slide-indicators">
+      <!-- Generated by JS -->
+    </div>
+
+    <!-- Slide Counter Badge -->
+    <span class="px-3 py-1 rounded-full bg-purple-50 text-[#745580] font-mono text-xs border border-purple-200">
+      <span id="current-slide-num">1</span> / <span id="total-slide-num">10</span>
+    </span>
+
+    <!-- Next Button -->
+    <button onclick="nextSlide()" class="p-2 rounded-xl hover:bg-purple-100 text-[#745580] transition flex items-center gap-1 cursor-pointer">
+      <span class="hidden sm:inline">Trang Sau</span>
+      <i class="fa-solid fa-chevron-right text-xs"></i>
+    </button>
+
+    <!-- Fullscreen Toggle -->
+    <button onclick="toggleFullscreen()" class="p-2 rounded-xl hover:bg-purple-100 text-[#745580] transition" title="Toàn màn hình (F)">
+      <i class="fa-solid fa-expand text-xs" id="fs-icon"></i>
+    </button>
+
+    <!-- Back to Localhost App -->
+    <a href="http://localhost:8000" class="px-3 py-1.5 rounded-xl clay-btn text-white text-[11px] font-bold transition flex items-center gap-1.5 no-underline">
+      <i class="fa-solid fa-house text-[10px]"></i>
+      <span class="hidden md:inline">Về App Localhost</span>
+    </a>
+  </nav>
+
+  <!-- ============================================================== -->
+  <!-- SLIDESHOW JAVASCRIPT CONTROLLER -->
+  <!-- ============================================================== -->
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 10;
+
+    function initIndicators() {
+      const container = document.getElementById('slide-indicators');
+      if (!container) return;
+      container.innerHTML = '';
+      for (let i = 1; i <= totalSlides; i++) {
+        const dot = document.createElement('div');
+        dot.className = `slide-dot ${i === 1 ? 'active' : ''}`;
+        dot.title = `Chuyển tới Slide ${i}`;
+        dot.onclick = () => goToSlide(i);
+        container.appendChild(dot);
+      }
+      document.getElementById('total-slide-num').textContent = totalSlides;
+    }
+
+    function updateSlide() {
+      document.querySelectorAll('.slide-panel').forEach((el, idx) => {
+        if (idx + 1 === currentSlide) {
+          el.classList.add('active');
+        } else {
+          el.classList.remove('active');
+        }
+      });
+
+      // Update dots
+      document.querySelectorAll('.slide-dot').forEach((dot, idx) => {
+        if (idx + 1 === currentSlide) {
+          dot.classList.add('active');
+        } else {
+          dot.classList.remove('active');
+        }
+      });
+
+      // Update counter
+      document.getElementById('current-slide-num').textContent = currentSlide;
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function goToSlide(n) {
+      if (n >= 1 && n <= totalSlides) {
+        currentSlide = n;
+        updateSlide();
+      }
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().then(() => {
+          document.body.classList.add('is-fullscreen');
+          const icon = document.getElementById('fs-icon');
+          if (icon) icon.className = "fa-solid fa-compress text-xs";
+        }).catch(err => {
+          console.warn("Fullscreen request error:", err);
+        });
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().then(() => {
+            document.body.classList.remove('is-fullscreen');
+            const icon = document.getElementById('fs-icon');
+            if (icon) icon.className = "fa-solid fa-expand text-xs";
+          });
+        }
+      }
+    }
+
+    // Keyboard Navigation
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      } else if (e.key === 'Home') {
+        goToSlide(1);
+      } else if (e.key === 'End') {
+        goToSlide(totalSlides);
+      }
+    });
+
+    // Touch Swipe Navigation for mobile/tablets
+    let touchStartX = 0;
+    let touchEndX = 0;
+    window.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    window.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      if (touchEndX < touchStartX - 50) nextSlide();
+      if (touchEndX > touchStartX + 50) prevSlide();
+    }, { passive: true });
+
+    // Initialize
+    initIndicators();
+  </script>
+</body>
+</html>

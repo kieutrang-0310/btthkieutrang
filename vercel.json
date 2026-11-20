@@ -1,0 +1,33 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/process",
+      "destination": "/api/process.py"
+    },
+    {
+      "source": "/api/feedback(.*)",
+      "destination": "/api/feedback.py"
+    },
+    {
+      "source": "/api/decisions(.*)",
+      "destination": "/api/decisions.py"
+    },
+    {
+      "source": "/api/chat",
+      "destination": "/api/chat.py"
+    },
+    {
+      "source": "/api/auth/(.*)",
+      "destination": "/api/auth.py"
+    },
+    {
+      "source": "/api/reset-session",
+      "destination": "/api/reset.py"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.py?path=/api/$1"
+    }
+  ]
+}
